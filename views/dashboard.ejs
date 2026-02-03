@@ -1,0 +1,814 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EventScout Dashboard</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .dashboard-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .dashboard-header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+        }
+        
+        .dashboard-header p {
+            margin: 10px 0 0;
+            opacity: 0.9;
+        }
+        
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .summary-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .summary-card h3 {
+            margin: 0 0 10px;
+            color: #666;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .summary-card .number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .summary-card.total-events .number {
+            color: #667eea;
+        }
+        
+        .summary-card.upcoming .number {
+            color: #10b981;
+        }
+        
+        .summary-card.expired .number {
+            color: #ef4444;
+        }
+        
+        .city-stats {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+        
+        .city-stats-header {
+            background: #f8fafc;
+            padding: 20px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .city-stats-header h2 {
+            margin: 0;
+            color: #334155;
+        }
+        
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .stats-table th {
+            background: #f1f5f9;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #475569;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .stats-table td {
+            padding: 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .stats-table tr:hover {
+            background: #f8fafc;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .status-upcoming {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-today {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-expired {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        
+        .btn-dashboard {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-dashboard:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #94a3b8;
+        }
+        
+        .btn-secondary:hover {
+            background: #64748b;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 50px;
+            color: #64748b;
+        }
+        
+        .empty-state h3 {
+            margin-bottom: 10px;
+        }
+        
+        .last-updated {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <h1>📊 EventScout Dashboard</h1>
+            <p>Monitor all your scraped events in one place</p>
+        </div>
+        
+        <div class="summary-cards">
+            <div class="summary-card total-events">
+                <h3>Total Events</h3>
+                <div class="number"><%= totals ? totals.totalEvents : 0 %></div>
+                <p>Across all cities</p>
+            </div>
+            
+            <div class="summary-card upcoming">
+                <h3>Upcoming Events</h3>
+                <div class="number"><%= totals ? totals.totalUpcoming : 0 %></div>
+                <p>Scheduled to happen</p>
+            </div>
+            
+            <div class="summary-card expired">
+                <h3>Expired Events</h3>
+                <div class="number"><%= totals ? totals.totalExpired : 0 %></div>
+                <p>Past events</p>
+            </div>
+        </div>
+        
+        <div class="city-stats">
+            <div class="city-stats-header">
+                <h2>📈 City-wise Statistics</h2>
+            </div>
+            
+            <% if (stats && stats.length > 0) { %>
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th>City</th>
+                            <th>Total Events</th>
+                            <th>Upcoming</th>
+                            <th>Expired</th>
+                            <th>Last Updated</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% stats.forEach(stat => { %>
+                            <tr>
+                                <td>
+                                    <strong><%= stat.city %></strong>
+                                </td>
+                                <td>
+                                    <span class="number"><%= stat.totalEvents %></span>
+                                </td>
+                                <td>
+                                    <span class="status-badge status-upcoming">
+                                        <%= stat.upcomingEvents %>
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="status-badge status-expired">
+                                        <%= stat.expiredEvents %>
+                                    </span>
+                                </td>
+                                <td>
+                                    <%= stat.lastUpdated %>
+                                </td>
+                                <td>
+                                    <a href="/events/<%= stat.city %>" class="btn-dashboard" style="padding: 8px 16px; font-size: 0.9rem;">
+                                        View Events
+                                    </a>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            <% } else { %>
+                <div class="empty-state">
+                    <h3>No data available</h3>
+                    <p>Start scraping events to see statistics here.</p>
+                    <a href="/" class="btn-dashboard">Go to Home</a>
+                </div>
+            <% } %>
+        </div>
+        
+        <div class="actions">
+            <a href="/" class="btn-dashboard">🏠 Back to Home</a>
+            <a href="#" onclick="location.reload()" class="btn-dashboard btn-secondary">🔄 Refresh Dashboard</a>
+            <a href="javascript:void(0)" onclick="runScraping()" class="btn-dashboard" style="background: #10b981;">
+                🚀 Run Scraping Now
+            </a>
+        </div>
+        
+        <div class="last-updated">
+            <p>Last checked: <%= lastChecked %></p>
+            <p>Auto-refreshes every 30 seconds</p>
+        </div>
+    </div>
+    
+    <script>
+        // Auto-refresh dashboard every 30 seconds
+        setTimeout(() => {
+            location.reload();
+        }, 30000);
+        
+        // Function to trigger scraping
+        async function runScraping() {
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            
+            btn.innerHTML = '⏳ Scraping...';
+            btn.style.background = '#f59e0b';
+            btn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/events?city=Mumbai&category=all');
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert(`✅ Scraping completed! Found ${data.count} events in Mumbai.`);
+                    location.reload();
+                } else {
+                    alert('❌ Scraping failed: ' + data.error);
+                }
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.style.background = '#10b981';
+                btn.disabled = false;
+            }
+        }
+        
+        // Display loading state
+        window.addEventListener('load', () => {
+            console.log('Dashboard loaded successfully');
+        });
+    </script>
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EventScout Dashboard</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .dashboard-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        .dashboard-header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+        }
+        
+        .dashboard-header p {
+            margin: 10px 0 0;
+            opacity: 0.9;
+        }
+        
+        .sheets-link {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            color: white;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+        
+        .sheets-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .summary-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+            position: relative;
+        }
+        
+        .summary-card h3 {
+            margin: 0 0 10px;
+            color: #666;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .summary-card .number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .summary-card.total-events .number {
+            color: #667eea;
+        }
+        
+        .summary-card.upcoming .number {
+            color: #10b981;
+        }
+        
+        .summary-card.expired .number {
+            color: #ef4444;
+        }
+        
+        .sheets-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #f0f0f0;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            color: #666;
+        }
+        
+        .city-stats {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+        
+        .city-stats-header {
+            background: #f8fafc;
+            padding: 20px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .city-stats-header h2 {
+            margin: 0;
+            color: #334155;
+        }
+        
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .stats-table th {
+            background: #f1f5f9;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #475569;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .stats-table td {
+            padding: 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .stats-table tr:hover {
+            background: #f8fafc;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .status-upcoming {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-today {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-expired {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-dashboard {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        .btn-dashboard:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .btn-secondary {
+            background: #94a3b8;
+        }
+        
+        .btn-secondary:hover {
+            background: #64748b;
+        }
+        
+        .btn-sheets {
+            background: #10b981;
+        }
+        
+        .btn-sheets:hover {
+            background: #0da271;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 50px;
+            color: #64748b;
+        }
+        
+        .empty-state h3 {
+            margin-bottom: 10px;
+        }
+        
+        .last-updated {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 10px;
+        }
+        
+        .sheets-section {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .sheets-section h3 {
+            margin-top: 0;
+            color: #334155;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .direct-link {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: #f8fafc;
+            border-radius: 5px;
+            color: #475569;
+            text-decoration: none;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s;
+        }
+        
+        .direct-link:hover {
+            background: #e2e8f0;
+            border-color: #cbd5e1;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <h1>📊 EventScout Dashboard</h1>
+            <p>Monitor all your scraped events in one place</p>
+            
+            <!-- Google Sheets Link in Header -->
+            <a href="https://docs.google.com/spreadsheets/d/12AsVedCq7Qkg5FPuA6Wzhe5jxsC6TY2ooEuZ34l1Ch0/edit?gid=713865691#gid=713865691" 
+               target="_blank" 
+               class="sheets-link">
+                📊 View Google Sheets
+            </a>
+        </div>
+        
+        <!-- Google Sheets Section -->
+        <div class="sheets-section">
+            <h3>📈 Live Google Sheets Data</h3>
+            <p>All scraped events are automatically saved to Google Sheets. Click below to view the live spreadsheet:</p>
+            <a href="https://docs.google.com/spreadsheets/d/12AsVedCq7Qkg5FPuA6Wzhe5jxsC6TY2ooEuZ34l1Ch0/edit?gid=713865691#gid=713865691" 
+               target="_blank" 
+               class="direct-link">
+                🔗 Open Google Sheets: EventScout Data
+            </a>
+            <p style="margin-top: 10px; font-size: 0.9rem; color: #64748b;">
+                <small>Opens in new tab • Auto-syncs with scraped data</small>
+            </p>
+        </div>
+        
+        <div class="summary-cards">
+            <div class="summary-card total-events">
+                <div class="sheets-badge">Live Data</div>
+                <h3>Total Events</h3>
+                <div class="number"><%= totals ? totals.totalEvents : 0 %></div>
+                <p>Across all cities</p>
+                <small>Stored in Google Sheets</small>
+            </div>
+            
+            <div class="summary-card upcoming">
+                <div class="sheets-badge">Live Data</div>
+                <h3>Upcoming Events</h3>
+                <div class="number"><%= totals ? totals.totalUpcoming : 0 %></div>
+                <p>Scheduled to happen</p>
+                <small>Auto-updated daily</small>
+            </div>
+            
+            <div class="summary-card expired">
+                <div class="sheets-badge">Live Data</div>
+                <h3>Expired Events</h3>
+                <div class="number"><%= totals ? totals.totalExpired : 0 %></div>
+                <p>Past events</p>
+                <small>Archived in Sheets</small>
+            </div>
+        </div>
+        
+        <div class="city-stats">
+            <div class="city-stats-header">
+                <h2>📈 City-wise Statistics</h2>
+                <a href="https://docs.google.com/spreadsheets/d/12AsVedCq7Qkg5FPuA6Wzhe5jxsC6TY2ooEuZ34l1Ch0/edit?gid=713865691#gid=713865691" 
+                   target="_blank" 
+                   style="color: #475569; text-decoration: none; font-size: 0.9rem; display: flex; align-items: center; gap: 5px;">
+                    <span>View in Sheets</span> ↗️
+                </a>
+            </div>
+            
+            <% if (stats && stats.length > 0) { %>
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th>City</th>
+                            <th>Total Events</th>
+                            <th>Upcoming</th>
+                            <th>Expired</th>
+                            <th>Last Updated</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% stats.forEach(stat => { %>
+                            <tr>
+                                <td>
+                                    <strong><%= stat.city %></strong>
+                                </td>
+                                <td>
+                                    <span class="number"><%= stat.totalEvents %></span>
+                                </td>
+                                <td>
+                                    <span class="status-badge status-upcoming">
+                                        <%= stat.upcomingEvents %>
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="status-badge status-expired">
+                                        <%= stat.expiredEvents %>
+                                    </span>
+                                </td>
+                                <td>
+                                    <%= stat.lastUpdated %>
+                                </td>
+                                <td>
+                                    <div style="display: flex; gap: 5px;">
+                                        <a href="/events/<%= stat.city %>" class="btn-dashboard" style="padding: 8px 12px; font-size: 0.85rem;">
+                                            View
+                                        </a>
+                                        <a href="https://docs.google.com/spreadsheets/d/12AsVedCq7Qkg5FPuA6Wzhe5jxsC6TY2ooEuZ34l1Ch0/edit?gid=713865691#gid=713865691" 
+                                           target="_blank" 
+                                           class="btn-dashboard" 
+                                           style="padding: 8px 12px; font-size: 0.85rem; background: #10b981;">
+                                            Sheets
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            <% } else { %>
+                <div class="empty-state">
+                    <h3>No data available</h3>
+                    <p>Start scraping events to see statistics here.</p>
+                    <p>Check Google Sheets directly: 
+                        <a href="https://docs.google.com/spreadsheets/d/12AsVedCq7Qkg5FPuA6Wzhe5jxsC6TY2ooEuZ34l1Ch0/edit?gid=713865691#gid=713865691" 
+                           target="_blank" 
+                           style="color: #667eea; text-decoration: underline;">
+                            Open Google Sheets
+                        </a>
+                    </p>
+                    <a href="/" class="btn-dashboard">Go to Home</a>
+                </div>
+            <% } %>
+        </div>
+        
+        <div class="actions">
+            <a href="/" class="btn-dashboard">🏠 Back to Home</a>
+            <a href="#" onclick="location.reload()" class="btn-dashboard btn-secondary">🔄 Refresh Dashboard</a>
+            <a href="javascript:void(0)" onclick="runScraping()" class="btn-dashboard" style="background: #10b981;">
+                🚀 Run Scraping Now
+            </a>
+            <a href="https://docs.google.com/spreadsheets/d/12AsVedCq7Qkg5FPuA6Wzhe5jxsC6TY2ooEuZ34l1Ch0/edit?gid=713865691#gid=713865691" 
+               target="_blank" 
+               class="btn-dashboard btn-sheets">
+                📊 Open Google Sheets
+            </a>
+        </div>
+        
+        <div class="last-updated">
+            <p>📅 Last checked: <%= lastChecked %></p>
+            <p>🔄 Auto-refreshes every 30 seconds | 
+                <a href="https://docs.google.com/spreadsheets/d/12AsVedCq7Qkg5FPuA6Wzhe5jxsC6TY2ooEuZ34l1Ch0/edit?gid=713865691#gid=713865691" 
+                   target="_blank" 
+                   style="color: #667eea; text-decoration: none;">
+                    📈 View Live Data in Google Sheets ↗️
+                </a>
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        // Auto-refresh dashboard every 30 seconds
+        setTimeout(() => {
+            location.reload();
+        }, 30000);
+        
+        // Function to trigger scraping
+        async function runScraping() {
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            
+            btn.innerHTML = '⏳ Scraping...';
+            btn.style.background = '#f59e0b';
+            btn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/events?city=Mumbai&category=all');
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert(`✅ Scraping completed! Found ${data.count} events in Mumbai.\n\nData saved to Google Sheets.`);
+                    
+                    // Open Google Sheets after successful scraping
+                    const openSheets = confirm('Open Google Sheets to view the updated data?');
+                    if (openSheets) {
+                        window.open('https://docs.google.com/spreadsheets/d/12AsVedCq7Qkg5FPuA6Wzhe5jxsC6TY2ooEuZ34l1Ch0/edit?gid=713865691#gid=713865691', '_blank');
+                    }
+                    
+                    location.reload();
+                } else {
+                    alert('❌ Scraping failed: ' + data.error);
+                }
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.style.background = '#10b981';
+                btn.disabled = false;
+            }
+        }
+        
+        // Add click tracking for Google Sheets links
+        document.addEventListener('DOMContentLoaded', function() {
+            const sheetsLinks = document.querySelectorAll('a[href*="docs.google.com"]');
+            sheetsLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    console.log('Opening Google Sheets:', this.href);
+                });
+            });
+            
+            console.log('Dashboard loaded successfully');
+            console.log('Google Sheets link:', 'https://docs.google.com/spreadsheets/d/12AsVedCq7Qkg5FPuA6Wzhe5jxsC6TY2ooEuZ34l1Ch0/edit?gid=713865691#gid=713865691');
+        });
+    </script>
+</body>
+</html>

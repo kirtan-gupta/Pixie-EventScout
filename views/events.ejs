@@ -1,0 +1,1057 @@
+<!-- views/events.ejs
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Events in <%= city %> - EventScout</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎭 Events in <%= city %></h1>
+            <% if (category && category !== 'all') { %>
+                <p class="category-tag">Category: <%= category %></p>
+            <% } %>
+            <% if (message) { %>
+                <div class="message"><%= message %></div>
+            <% } %>
+            <a href="/" class="back-btn">← Back to Home</a>
+        </header>
+        
+        <div class="events-grid">
+            <% if (events.length === 0) { %>
+                <div class="no-events">
+                    <h3>No events found for <%= city %></h3>
+                    <p>Try a different city or check back later.</p>
+                </div>
+            <% } %>
+            
+            <% events.forEach((event, index) => { %>
+                <div class="event-card">
+                    <div class="event-header">
+                        <h3><%= event.name %></h3>
+                        <% if (event.category && event.category !== 'all') { %>
+                            <span class="event-category"><%= event.category %></span>
+                        <% } %>
+                    </div>
+                    
+                    <div class="event-details">
+                        <p>📅 <strong>Date:</strong> <%= event.date %></p>
+                        <p>📍 <strong>Venue:</strong> <%= event.venue %></p>
+                        <p>🏙️ <strong>City:</strong> <%= event.city %></p>
+                        <% if (event.price) { %>
+                            <p>💰 <strong>Price:</strong> <%= event.price %></p>
+                        <% } %>
+                        <% if (event.status) { %>
+                            <p class="event-status <%= event.status.toLowerCase() %>">
+                                Status: <%= event.status %>
+                            </p>
+                        <% } %>
+                    </div>
+                    
+                    <div class="event-actions">
+                        <a href="<%= event.url %>" target="_blank" class="btn btn-view">
+                            View Details
+                        </a>
+                        <% if (event.description) { %>
+                            <button class="btn btn-info" onclick="toggleDescription(<%= index %>)">
+                                More Info
+                            </button>
+                            <div id="desc-<%= index %>" class="event-description" style="display: none;">
+                                <%= event.description %>
+                            </div>
+                        <% } %>
+                    </div>
+                    
+                    <div class="event-footer">
+                        <small>Scraped: <%= new Date(event.scrapedAt).toLocaleString() %></small>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+        
+        <footer>
+            <p>Total: <%= events.length %> events</p>
+            <p><em>Last updated: <%= new Date().toLocaleString() %></em></p>
+        </footer>
+    </div>
+    
+    <script>
+        function toggleDescription(index) {
+            const desc = document.getElementById(`desc-${index}`);
+            desc.style.display = desc.style.display === 'none' ? 'block' : 'none';
+        }
+    </script>
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Events in <%= city %> - EventScout</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5a67d8;
+            --secondary: #764ba2;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --light: #f8fafc;
+            --dark: #1e293b;
+            --gray: #64748b;
+            --border: #e2e8f0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            min-height: 100vh;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        /* Header Styles */
+        .page-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.2);
+        }
+
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+            opacity: 0.1;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+        }
+
+        .header-content h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .header-content h1 i {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 50%;
+        }
+
+        .city-info {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+
+        .category-tag {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.3);
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-weight: 600;
+            margin: 10px 0;
+            backdrop-filter: blur(10px);
+        }
+
+        .message {
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--dark);
+            padding: 15px 25px;
+            border-radius: 12px;
+            margin: 20px auto;
+            max-width: 600px;
+            font-weight: 500;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-left: 4px solid var(--success);
+        }
+
+        .message.error {
+            border-left-color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: white;
+            color: var(--primary);
+        }
+
+        .btn-primary:hover {
+            background: #f8fafc;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-3px);
+        }
+
+        /* Events Grid */
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        /* Event Card */
+        .event-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            transition: all 0.4s ease;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .event-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+        }
+
+        .event-card.featured {
+            border: 2px solid var(--primary);
+            position: relative;
+        }
+
+        .event-card.featured::before {
+            content: '⭐ Featured';
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--primary);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            z-index: 2;
+        }
+
+        .event-image {
+            height: 200px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .event-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .event-image .image-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: white;
+            font-size: 3rem;
+        }
+
+        .event-date {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 10px 15px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .event-date .day {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--primary);
+            line-height: 1;
+        }
+
+        .event-date .month {
+            font-size: 0.9rem;
+            color: var(--gray);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .event-content {
+            padding: 25px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .event-header {
+            margin-bottom: 15px;
+        }
+
+        .event-header h3 {
+            font-size: 1.4rem;
+            color: var(--dark);
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .event-category {
+            display: inline-block;
+            background: var(--light);
+            color: var(--primary);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+
+        .event-details {
+            margin-bottom: 20px;
+            flex: 1;
+        }
+
+        .event-detail-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            color: var(--gray);
+        }
+
+        .event-detail-item i {
+            width: 24px;
+            color: var(--primary);
+            margin-top: 2px;
+        }
+
+        .event-detail-item span {
+            flex: 1;
+        }
+
+        .event-detail-item strong {
+            color: var(--dark);
+            margin-right: 5px;
+        }
+
+        .event-status {
+            display: inline-block;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .event-status.upcoming {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .event-status.today {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .event-status.expired {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .event-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: auto;
+        }
+
+        .btn-view {
+            flex: 1;
+            background: var(--primary);
+            color: white;
+            text-align: center;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-view:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-info {
+            background: var(--light);
+            color: var(--dark);
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-info:hover {
+            background: var(--border);
+        }
+
+        .event-footer {
+            padding: 15px 25px;
+            background: var(--light);
+            border-top: 1px solid var(--border);
+            font-size: 0.85rem;
+            color: var(--gray);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* No Events State */
+        .no-events {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        }
+
+        .no-events i {
+            font-size: 4rem;
+            color: var(--gray);
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .no-events h3 {
+            font-size: 1.8rem;
+            color: var(--dark);
+            margin-bottom: 15px;
+        }
+
+        .no-events p {
+            color: var(--gray);
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            max-width: 500px;
+            margin: 0 auto 30px;
+        }
+
+        /* Footer */
+        .page-footer {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            display: block;
+        }
+
+        .stat-label {
+            color: var(--gray);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .last-updated {
+            color: var(--gray);
+            font-size: 0.95rem;
+        }
+
+        /* Description Modal */
+        .description-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            backdrop-filter: blur(5px);
+        }
+
+        .description-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            animation: modalSlide 0.3s ease;
+        }
+
+        @keyframes modalSlide {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--light);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: var(--gray);
+            transition: all 0.3s;
+        }
+
+        .close-modal:hover {
+            background: var(--border);
+            color: var(--dark);
+        }
+
+        /* Filters */
+        .filters {
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+
+        .filter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .filter-header h3 {
+            color: var(--dark);
+            font-size: 1.2rem;
+        }
+
+        .filter-options {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            background: var(--light);
+            border: none;
+            border-radius: 10px;
+            color: var(--gray);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .filter-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .filter-btn:hover:not(.active) {
+            background: var(--border);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .page-header {
+                padding: 30px 20px;
+            }
+
+            .header-content h1 {
+                font-size: 2.2rem;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .events-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .stats {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .event-actions {
+                flex-direction: column;
+            }
+        }
+
+        /* Animation for cards */
+        .event-card {
+            animation: fadeInUp 0.5s ease forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Stagger animation for cards */
+        .event-card:nth-child(1) { animation-delay: 0.1s; }
+        .event-card:nth-child(2) { animation-delay: 0.2s; }
+        .event-card:nth-child(3) { animation-delay: 0.3s; }
+        .event-card:nth-child(4) { animation-delay: 0.4s; }
+        .event-card:nth-child(5) { animation-delay: 0.5s; }
+        .event-card:nth-child(6) { animation-delay: 0.6s; }
+        .event-card:nth-child(7) { animation-delay: 0.7s; }
+        .event-card:nth-child(8) { animation-delay: 0.8s; }
+        .event-card:nth-child(9) { animation-delay: 0.9s; }
+        .event-card:nth-child(10) { animation-delay: 1s; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="page-header">
+            <div class="header-content">
+                <h1><i class="fas fa-calendar-star"></i> Events in <%= city %></h1>
+                <div class="city-info">
+                    <i class="fas fa-map-marker-alt"></i> <%= city %>, India
+                    <% if (category && category !== 'all') { %>
+                        • <span class="category-tag"><i class="fas fa-tag"></i> <%= category %></span>
+                    <% } %>
+                </div>
+                
+                <% if (message) { %>
+                    <div class="message"><%= message %></div>
+                <% } %>
+                
+                <div class="action-buttons">
+                    <a href="/" class="btn btn-primary">
+                        <i class="fas fa-home"></i> Back to Home
+                    </a>
+                    <a href="/dashboard" class="btn btn-secondary">
+                        <i class="fas fa-tachometer-alt"></i> View Dashboard
+                    </a>
+                    <a href="https://docs.google.com/spreadsheets/d/12AsVedCq7Qkg5FPuA6Wzhe5jxsC6TY2ooEuZ34l1Ch0/edit?gid=713865691#gid=713865691" 
+                       target="_blank" class="btn btn-secondary">
+                        <i class="fas fa-file-excel"></i> Open Google Sheets
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters">
+            <div class="filter-header">
+                <h3><i class="fas fa-filter"></i> Filter Events</h3>
+                <span class="stat-label"><%= events.length %> events found</span>
+            </div>
+            <div class="filter-options">
+                <button class="filter-btn active" onclick="filterEvents('all')">All Events</button>
+                <button class="filter-btn" onclick="filterEvents('upcoming')">Upcoming</button>
+                <button class="filter-btn" onclick="filterEvents('today')">Today</button>
+                <button class="filter-btn" onclick="filterEvents('free')">Free Events</button>
+                <button class="filter-btn" onclick="filterEvents('featured')">Featured</button>
+            </div>
+        </div>
+
+        <!-- Events Grid -->
+        <div class="events-grid" id="eventsGrid">
+            <% if (events.length === 0) { %>
+                <div class="no-events">
+                    <i class="fas fa-calendar-times"></i>
+                    <h3>No events found for <%= city %></h3>
+                    <p>Try selecting a different city or check back later for new events.</p>
+                    <a href="/" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Search Other Cities
+                    </a>
+                </div>
+            <% } else { %>
+                <% events.forEach((event, index) => { 
+                    // Parse date for display
+                    const eventDate = new Date(event.date);
+                    const day = eventDate.getDate();
+                    const month = eventDate.toLocaleString('default', { month: 'short' });
+                    const isFeatured = index < 2; // First 2 events as featured
+                %>
+                    <div class="event-card <%= isFeatured ? 'featured' : '' %>" 
+                         data-status="<%= event.status || 'upcoming' %>"
+                         data-price="<%= event.price === 'Free' ? 'free' : 'paid' %>">
+                        <!-- Event Image -->
+                        <div class="event-image">
+                            <% if (event.image) { %>
+                                <img src="<%= event.image %>" alt="<%= event.name %>">
+                            <% } else { %>
+                                <div class="image-placeholder">
+                                    <i class="fas fa-calendar-day"></i>
+                                </div>
+                            <% } %>
+                            <div class="event-date">
+                                <div class="day"><%= day %></div>
+                                <div class="month"><%= month %></div>
+                            </div>
+                        </div>
+
+                        <!-- Event Content -->
+                        <div class="event-content">
+                            <div class="event-header">
+                                <h3><%= event.name %></h3>
+                                <% if (event.category && event.category !== 'all') { %>
+                                    <span class="event-category"><%= event.category %></span>
+                                <% } %>
+                            </div>
+
+                            <div class="event-details">
+                                <div class="event-detail-item">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span><strong>Date:</strong> <%= event.date %></span>
+                                </div>
+                                
+                                <div class="event-detail-item">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span><strong>Venue:</strong> <%= event.venue %></span>
+                                </div>
+                                
+                                <div class="event-detail-item">
+                                    <i class="fas fa-city"></i>
+                                    <span><strong>City:</strong> <%= event.city %></span>
+                                </div>
+                                
+                                <% if (event.price) { %>
+                                    <div class="event-detail-item">
+                                        <i class="fas fa-tag"></i>
+                                        <span><strong>Price:</strong> <%= event.price %></span>
+                                    </div>
+                                <% } %>
+                                
+                                <% if (event.status) { %>
+                                    <span class="event-status <%= event.status.toLowerCase() %>">
+                                        <%= event.status %>
+                                    </span>
+                                <% } %>
+                            </div>
+
+                            <div class="event-actions">
+                                <a href="<%= event.url %>" target="_blank" class="btn-view">
+                                    <i class="fas fa-external-link-alt"></i> View Details
+                                </a>
+                                <% if (event.description) { %>
+                                    <button class="btn-info" onclick="showDescription(<%= index %>)">
+                                        <i class="fas fa-info-circle"></i> More Info
+                                    </button>
+                                <% } %>
+                            </div>
+                        </div>
+
+                        <div class="event-footer">
+                            <small><i class="fas fa-database"></i> Scraped: <%= new Date(event.scrapedAt).toLocaleDateString() %></small>
+                            <small><i class="fas fa-clock"></i> <%= new Date(event.scrapedAt).toLocaleTimeString() %></small>
+                        </div>
+                    </div>
+
+                    <!-- Description Modal (hidden by default) -->
+                    <% if (event.description) { %>
+                        <div class="description-modal" id="modal-<%= index %>">
+                            <div class="description-content">
+                                <button class="close-modal" onclick="closeModal(<%= index %>)">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                <h3><%= event.name %></h3>
+                                <div class="event-detail-item">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span><strong>Date:</strong> <%= event.date %></span>
+                                </div>
+                                <div class="event-detail-item">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span><strong>Venue:</strong> <%= event.venue %></span>
+                                </div>
+                                <div class="event-detail-item">
+                                    <i class="fas fa-city"></i>
+                                    <span><strong>City:</strong> <%= event.city %></span>
+                                </div>
+                                <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border);">
+                                    <h4>Description</h4>
+                                    <p><%= event.description %></p>
+                                </div>
+                                <div style="margin-top: 20px;">
+                                    <a href="<%= event.url %>" target="_blank" class="btn-view" style="display: inline-block;">
+                                        <i class="fas fa-external-link-alt"></i> Visit Event Page
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    <% } %>
+                <% }); %>
+            <% } %>
+        </div>
+
+        <!-- Footer -->
+        <div class="page-footer">
+            <div class="stats">
+                <div class="stat-item">
+                    <span class="stat-number"><%= events.length %></span>
+                    <span class="stat-label">Total Events</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="upcomingCount">
+                        <%= events.filter(e => e.status === 'upcoming' || e.status === 'today').length %>
+                    </span>
+                    <span class="stat-label">Upcoming</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="freeCount">
+                        <%= events.filter(e => e.price === 'Free').length %>
+                    </span>
+                    <span class="stat-label">Free Events</span>
+                </div>
+            </div>
+            <div class="last-updated">
+                <i class="fas fa-sync-alt"></i> Last updated: <%= new Date().toLocaleString() %>
+                <br>
+                <small>Data sourced from Google Events via SERP API • Auto-sync with Google Sheets</small>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Filter events function
+        function filterEvents(filterType) {
+            const cards = document.querySelectorAll('.event-card');
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            
+            // Update active button
+            filterBtns.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Filter cards
+            cards.forEach(card => {
+                switch(filterType) {
+                    case 'all':
+                        card.style.display = 'flex';
+                        break;
+                    case 'upcoming':
+                        const status = card.getAttribute('data-status');
+                        card.style.display = (status === 'upcoming' || status === 'today') ? 'flex' : 'none';
+                        break;
+                    case 'today':
+                        const todayStatus = card.getAttribute('data-status');
+                        card.style.display = todayStatus === 'today' ? 'flex' : 'none';
+                        break;
+                    case 'free':
+                        const price = card.getAttribute('data-price');
+                        card.style.display = price === 'free' ? 'flex' : 'none';
+                        break;
+                    case 'featured':
+                        card.style.display = card.classList.contains('featured') ? 'flex' : 'none';
+                        break;
+                }
+            });
+            
+            // Update count
+            const visibleCards = Array.from(cards).filter(card => 
+                card.style.display !== 'none'
+            ).length;
+            document.querySelector('.filter-header .stat-label').textContent = 
+                `${visibleCards} events found`;
+        }
+
+        // Show description modal
+        function showDescription(index) {
+            const modal = document.getElementById(`modal-${index}`);
+            if (modal) {
+                modal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        // Close modal
+        function closeModal(index) {
+            const modal = document.getElementById(`modal-${index}`);
+            if (modal) {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('description-modal')) {
+                e.target.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        });
+
+        // Add hover effect to cards
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.event-card');
+            
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-10px) scale(1.02)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1)';
+                });
+            });
+
+            // Initialize counts
+            updateEventCounts();
+        });
+
+        // Update event counts
+        function updateEventCounts() {
+            const upcomingCount = <%= events.filter(e => e.status === 'upcoming' || e.status === 'today').length %>;
+            const freeCount = <%= events.filter(e => e.price === 'Free').length %>;
+            
+            document.getElementById('upcomingCount').textContent = upcomingCount;
+            document.getElementById('freeCount').textContent = freeCount;
+        }
+
+        // Search within page
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'k') {
+                e.preventDefault();
+                const search = prompt('Search events by name, venue, or category:');
+                if (search) {
+                    const cards = document.querySelectorAll('.event-card');
+                    const searchLower = search.toLowerCase();
+                    
+                    cards.forEach(card => {
+                        const text = card.textContent.toLowerCase();
+                        card.style.display = text.includes(searchLower) ? 'flex' : 'none';
+                    });
+                    
+                    const visibleCards = Array.from(cards).filter(card => 
+                        card.style.display !== 'none'
+                    ).length;
+                    document.querySelector('.filter-header .stat-label').textContent = 
+                        `${visibleCards} events found for "${search}"`;
+                }
+            }
+        });
+
+        // Export to CSV function
+        function exportToCSV() {
+            const events = <%= JSON.stringify(events) %>;
+            let csv = 'Event Name,Date,Venue,City,Category,Price,Status,URL\n';
+            
+            events.forEach(event => {
+                csv += `"${event.name}","${event.date}","${event.venue}","${event.city}","${event.category}","${event.price}","${event.status}","${event.url}"\n`;
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `events-${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+    </script>
+</body>
+</html>
